@@ -1,0 +1,61 @@
+---
+title: "stroke_data"
+format: html
+editor: visual
+---
+
+```{r}
+library (tidyverse)
+```
+
+probability heart disease
+
+```{r}
+probability_heart_disease <- my_data %>% 
+count(heart_disease) %>% 
+mutate(percent = n / sum(n)) %>% 
+filter(heart_disease == 1) %>% 
+pull(percent)
+```
+
+probability male
+
+```{r}
+Is_male <- my_data %>% 
+  count(gender) %>% 
+  mutate(percent = n / sum(n)) %>% 
+  filter(gender == "Male") %>% 
+  pull(percent)
+```
+
+probability of having a stroke
+
+```{r}
+probability_having_stroke <- my_data %>% 
+count(stroke) %>% 
+mutate(percent = n / sum(n)) %>% 
+filter(stroke == 1) %>% 
+pull(percent)
+```
+
+probability of having heart disease as a male
+
+```{r}
+probability_heart_disease_given_male <- my_data %>% 
+  count(gender, heart_disease) %>% 
+  group_by(heart_disease) %>% 
+  mutate(percent = n / sum(n)) %>% 
+  filter(heart_disease == 1, gender == "Male") %>% 
+  pull(percent)
+```
+
+probability having heart disease given you have a stroke
+
+```{r}
+probability_heart_disease_given_stroke <- my_data %>% 
+count(heart_disease, stroke) %>% 
+group_by(heart_disease) %>% 
+mutate(percent = n / sum(n)) %>% 
+filter(heart_disease == 1, stroke == 1) %>% 
+pull(percent)
+```
