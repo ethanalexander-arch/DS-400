@@ -81,7 +81,9 @@ Things to keep on mind:
 
 Set the scene...
 
-π = The number of Division 1 collegiate basketball players who end up in the NBA
+the main question we are going to answer is what percent of NBA players played on division 1 rosters before going pro. the prior is the roster from 1980 and the new data is the roster from 2026. we saw that less players in the 2026 roster played on division 1 rosters than in 1980.
+
+π = The proportion of NBA players that played in NCAA D1 and then ended up playing professional.
 
 ```{r}
 plot_beta(alpha = 234 , beta = 30 )
