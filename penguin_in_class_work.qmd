@@ -1,0 +1,56 @@
+---
+title: "penguins in class"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(bayesrules)
+library(rstanarm)
+
+data <- bayesrules::penguins_bayes
+
+```
+
+```{r}
+ggplot(data=data, aes(x = flipper_length_mm))+
+  geom_histogram()
+```
+
+the flipper length histogram has 2 bell shapes which are probably from the most common species in the data set having a range of flipper lengths
+
+```{r}
+ggplot(data=data, aes(x = flipper_length_mm))+
+  geom_point()
+
+```
+
+#ans
+
+.
+
+```{r}
+m0 <- 200   # centered intercept mean
+s0 <- 10.2   # centered intercept SD
+m1 <- 3.5   # slope mean
+s1 <- 1.02   # slope SD
+l  <- .08   # sigma's exponential rate
+```
+
+```{r}
+model <- stan_glm(
+  flipper_length_mm ~ bill_length_mm, data = data,
+  family = gaussian,
+  prior_intercept = normal(m0, s0),
+  prior = normal(m1, s1),
+  prior_aux = exponential(l),
+  chains = 4, iter = 2000, seed = 84735
+)
+```
+
+```{r}
+posterior <- as.data.frame(model)
+beta0c_draws <- posterior$`(Intercept)` + posterior$bill_length_mm * mean(data$bill_length_mm)
+
+```
