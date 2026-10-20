@@ -1,0 +1,133 @@
+---
+title: "conditional_probability_workshop"
+format: html
+editor: visual
+---
+
+## 
+
+```{r}
+library(here)
+library(readr)
+library(ggplot2)
+```
+
+```{r}
+cond_prob <- read_csv(here("healthcare-dataset-stroke-data.csv"))
+```
+
+```{r}
+stroke_plot_data <- cond_prob %>%
+  filter(gender %in% c("Female","Male")) %>%
+  mutate(stroke = factor(stroke, levels = c(0, 1), labels = c("No Stroke", "Stroke")))%>%
+  mutate(heart_disease = factor(heart_disease, levels = c(0, 1), labels = c("No Heart Disease", "Heart Disease")))
+  
+```
+
+```{r}
+ggplot(data = stroke_plot_data, aes(x = gender, fill = stroke))+
+  geom_bar(position = ("dodge"))
+```
+
+```{r}
+ggplot(data = stroke_plot_data, aes(x = age, fill = stroke))+
+  geom_histogram(color = "black")
+```
+
+```{r}
+ggplot(data = stroke_plot_data, aes(x = stroke, y = avg_glucose_level, fill = stroke))+
+  geom_boxplot(show.legend = FALSE)
+```
+
+```{r}
+ggplot(data = stroke_plot_data, aes(x = heart_disease, fill = stroke))+
+  geom_bar(position = "dodge")
+```
+
+P(A)
+
+```{r}
+prob_has_hypertension <- cond_prob %>% 
+  count(hypertension) %>% 
+  mutate(percent = n / sum(n))%>%
+  filter(hypertension == 1) |> 
+  pull(percent)
+prob_has_hypertension
+```
+
+```{r}
+prob_male <- cond_prob %>%
+  count(gender)%>%
+  mutate(percent = n/ sum(n))%>%
+  filter(gender == "Male")%>%
+  pull(percent)
+prob_male
+
+```
+
+```{r}
+prob_has_heart_disease <- cond_prob%>%
+  count(heart_disease)%>%
+  mutate(percent = n/ sum(n))%>%
+  filter(heart_disease == 1)%>%
+  pull(percent)
+prob_has_heart_disease
+```
+
+P(B)
+
+```{r}
+
+prob_stroke <- cond_prob%>%
+  count(stroke)%>%
+  mutate(percent = n/ sum(n))%>%
+  filter(stroke == 1) |> 
+  pull(percent)
+prob_stroke
+```
+
+P(A\|B) (male, heart disease, hypertension)
+
+```{r}
+prob_male_given_stroke <- cond_prob |> 
+  count(gender, stroke) %>% 
+  group_by(stroke) %>% 
+  mutate(percent = n / sum(n)) %>% 
+  filter(stroke == 1, gender == "Male") %>% 
+  pull(percent)
+prob_male_given_stroke
+```
+
+```{r}
+prob_heart_disease_given_stroke <- cond_prob %>%
+  count(heart_disease, stroke) %>% 
+  group_by(stroke) %>% 
+  mutate(percent = n / sum(n)) %>% 
+  filter(stroke == 1, heart_disease == 1) %>% 
+  pull(percent)
+prob_heart_disease_given_stroke
+```
+
+```{r}
+prob_hypertension_given_stroke <- cond_prob%>%
+  count(hypertension, stroke) %>% 
+  group_by(stroke) %>% 
+  mutate(percent = n / sum(n)) %>% 
+  filter(stroke == 1, hypertension == 1) %>% 
+  pull(percent)
+prob_hypertension_given_stroke
+```
+
+P(B\|A) (male, heart disease, hypertension)
+
+```{r}
+(prob_male_given_stroke*prob_stroke)/prob_male
+```
+
+```{r}
+(prob_heart_disease_given_stroke*prob_stroke)/prob_has_heart_disease
+```
+
+```{r}
+(prob_hypertension_given_stroke*prob_stroke)/prob_has_hypertension
+```

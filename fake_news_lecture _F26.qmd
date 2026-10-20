@@ -346,7 +346,7 @@ Create a model with a custom feature list and test for accuracy with a confusion
 news_data <- news_data %>%
   mutate(has_author = factor(!is.na(authors)))
 
-model5 <- naiveBayes(type ~ title_has_excl + title_excl+ title_words + text_caps_percent + authors + text_syllables_per_word + title_caps_percent + fear + anger+ disgust+ surprise,
+model5 <- naiveBayes(type ~ title_has_excl + title_excl+ title_words + text_caps_percent + text_syllables_per_word + title_caps_percent + fear + anger+ disgust+ surprise,
                      data = news_data)
 model5
 ```
@@ -411,3 +411,9 @@ subset_results %>%
 ```
 
 #### Your turn - Create a visual from subset_results
+
+```{r}
+ggplot(news_data, aes(x = type, fill = type)) +
+  geom_bar() 
+
+```

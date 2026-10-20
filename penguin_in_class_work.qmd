@@ -5,28 +5,41 @@ editor: visual
 ---
 
 ```{r}
+options(scipen = 10)
 library(tidyverse)
 library(bayesrules)
 library(rstanarm)
-
+library(ggplot2)
+library(ggpubr)
+library(ggExtra)
+library(report)
 data <- bayesrules::penguins_bayes
 
 ```
 
 ```{r}
-ggplot(data=data, aes(x = flipper_length_mm))+
+ggplot(data=data, aes(x = flipper_length_mm, fill = species))+
   geom_histogram()
 ```
 
 the flipper length histogram has 2 bell shapes which are probably from the most common species in the data set having a range of flipper lengths
 
 ```{r}
-ggplot(data=data, aes(x = flipper_length_mm))+
+ggplot(data=data, aes(x = flipper_length_mm, y = bill_length_mm))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor()
+```
+
+```{r}
+p <- ggplot(data=data, aes(x = flipper_length_mm, y = bill_length_mm))+
   geom_point()
+
+ggMarginal(p, type = "density", groupfill = TRUE)
 
 ```
 
-#ans
+the graph here is pretty positive
 
 .
 
@@ -36,6 +49,18 @@ s0 <- 10.2   # centered intercept SD
 m1 <- 3.5   # slope mean
 s1 <- 1.02   # slope SD
 l  <- .08   # sigma's exponential rate
+```
+
+```{r}
+plot_normal(200, 10.2)
+```
+
+```{r}
+plot_normal(3.5,1.02)
+```
+
+```{r}
+plot_gamma(1, 0.08)
 ```
 
 ```{r}
@@ -50,7 +75,68 @@ model <- stan_glm(
 ```
 
 ```{r}
+model
+```
+
+```{r}
+summary(model)
+```
+
+```{r}
+report::report(model)
+```
+
+```{r}
 posterior <- as.data.frame(model)
-beta0c_draws <- posterior$`(Intercept)` + posterior$bill_length_mm * mean(data$bill_length_mm)
+beta0c_draws <- posterior$`(Intercept)` + posterior$bill_length_mm * mean(data$bill_length_mm, na.rm = TRUE)
 
 ```
+
+using machine learning to predict the winning score of of pga tour events
+
+<https://norma.ncirl.ie/2493/1/oisinwiseman.pdf#page=2.83>
+
+<https://www.kaggle.com/datasets/cviaxmiwnptr/pga-tour-results-2001-to-may-2024/data>
+
+```{r}
+median(posterior$`(Intercept)`)
+median(posterior$bill_length_mm)
+```
+
+flipper_length_mm = intercept of bill length_mm + slope of the graph for bill_length_mm × bill_length_mm.
+
+```{r}
+quantile(posterior$bill_length_mm, c(0.05, 0.95))
+```
+
+There is a 90% probability that for every 1mm increase in a penguin's bill length, their flipper length increases by between 1.5 mm and 1.87 mm.
+
+```{r}
+quantile(beta0c_draws, c(0.05, 0.95))
+```
+
+there is a 90% probability that a penguin with an average bill length will have a flipper length between 199.9 mm and 201.86 mm.
+
+```{r}
+mean(posterior$bill_length_mm > 0)
+```
+
+this tells us what the probability of the slope being positive is and the p value tells us how surprising it is if the slope is 0
+
+```{r}
+summary(model)[, c("Rhat", "n_eff")]
+
+```
+
+since all of the Rhat values are close to 1 this tells us that the chain worked properly and the posterior is accurate.
+
+```{r}
+lm(flipper_length_mm ~ bill_length_mm, data = data)
+```
+
+```{r}
+median(posterior$`(Intercept)`)
+median(posterior$bill_length_mm)
+```
+
+they are very similar so a linear model would work better for this use case because it is much faster and will still give us very similar results.
